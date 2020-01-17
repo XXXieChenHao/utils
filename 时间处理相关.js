@@ -1,5 +1,5 @@
 
-//Ê±¼ä´Á×ª»»³ÉÈÕÆÚÊ±¼ä
+//æ—¶é—´æˆ³è½¬æ¢æˆæ—¥æœŸæ—¶é—´
 function formatTime(unixtime) {
   var dateTime = new Date(parseInt(unixtime))
   var year = dateTime.getFullYear();
@@ -9,13 +9,13 @@ function formatTime(unixtime) {
   var minute = dateTime.getMinutes();
   var second = dateTime.getSeconds();
   var now = new Date();
-  var now_new = Date.parse(now.toDateString());  //typescript×ª»»Ğ´·¨
+  var now_new = Date.parse(now.toDateString());  //typescriptè½¬æ¢å†™æ³•
   var milliseconds = now_new - dateTime;
-  var timeSpanStr = year + '/' + month + '/' + day + '';//+ ' ' + hour + ':' + minute
+  var timeSpanStr = year + '/' + add0(month) + '/' + add0(day) + '';//+ ' ' + hour + ':' + minute
   return timeSpanStr;
 }
 
-//Ê±¼ä´Á×ª»»³ÉÈÕÆÚÊ±¼ä
+//æ—¶é—´æˆ³è½¬æ¢æˆæ—¥æœŸæ—¶é—´
 function formatTimeSmall(unixtime) {
   var dateTime = new Date(parseInt(unixtime))
   var year = dateTime.getFullYear();
@@ -25,18 +25,19 @@ function formatTimeSmall(unixtime) {
   var minute = dateTime.getMinutes();
   var second = dateTime.getSeconds();
   var now = new Date();
-  var now_new = Date.parse(now.toDateString());  //typescript×ª»»Ğ´·¨
+  var now_new = Date.parse(now.toDateString());  //typescriptè½¬æ¢å†™æ³•
   var milliseconds = now_new - dateTime;
-  var timeSpanStr = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;//+ ' ' + hour + ':' + minute
+  var timeSpanStr = year + '-' + add0(month) + '-' + add0(day) + ' ' + add0(hour) + ':' + add0(minute) + ':' + add0(second);//+ ' ' + hour + ':' + minute
   return timeSpanStr;
 }
 
-// Ê£ÓàÊ±¼ä´¦Àí
-function dateCount(time) {
-  // »ñÈ¡ÏÖÔÚµÄÊ±¼ä
+function add0(m) {return m < 10? '0' + m : m}
+
+function dateCount(time, variable) {
+  // è·å–ç°åœ¨çš„æ—¶é—´
   var date = new Date();
-  // »ñÈ¡ÆßÌìºóµÄÊ±¼ä
-  var preTime = time + 604800000;
+  // è·å–æœªæ¥çš„æ—¶é—´
+  var preTime = time + variable * 60 * 60 * 1000;
   var until = new Date(preTime);
   var days = (until - date) / 1000 / 3600 / 24;
   var day = Math.floor(days);
@@ -46,6 +47,10 @@ function dateCount(time) {
   var minute = Math.floor(minutes);
   var seconds = (minutes - minute) * 60;
   var second = Math.floor(seconds);
-  var back = 'Ê£Óà ' + day + ' Ìì ' + hour + ' Ğ¡Ê± ' + minute + ' ·ÖÖÓ ' + second + ' Ãë ';
+  var temp = variable > 24 ?  day + 'å¤©': ''
+  var back = 'å‰©ä½™ ' + temp + hour + 'å°æ—¶ ' + minute + ' åˆ†é’Ÿ ' + second + ' ç§’ ';
+  if(days <= 0) {
+    return  'å·²è¿‡æœŸ'
+  }
   return back;
 }
