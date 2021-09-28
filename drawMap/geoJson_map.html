@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>地图遮罩</title>
+    <style>
+    html,
+    body,
+    #container {
+        margin:0;
+        height: 100%;
+    }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=db2eaafcb51926e557781572e9e63343&plugin=AMap.DistrictSearch"></script>
+<script src="./allJson.js"></script>
+
+<script type="text/javascript">
+    var map = new AMap.Map('container', {
+        center: [109.01033878326416, 34.36168256626141],
+        zoom: 11.5
+    });
+    
+    // var geoJSON = chanba
+    // var geojson = new AMap.GeoJSON({
+    //             geoJSON: geoJSON,
+    //             // 还可以自定义getMarker和getPolyline
+    //             getPolygon: function(geojson, lnglats) {
+    //                 // 计算面积
+    //                 var area = AMap.GeometryUtil.ringArea(lnglats[0])
+
+    //                 return new AMap.Polygon({
+    //                 path: lnglats,
+    //                 fillOpacity: 1 - Math.sqrt(area / 8000000000),// 面积越大透明度越高
+    //                 strokeColor: '#3171f6dd',
+    //                 fillColor: 'rgba(232, 242, 245, .5)'
+    //             });
+    //             }
+    //         });
+    //     geojson.setMap(map);
+
+            
+    function creatPolyline(bounds) {
+        const _this = this;
+        bounds.map(item => {
+
+        var geojson = new AMap.GeoJSON({
+          geoJSON: item,
+          getPolygon: function(geojson, lnglats) {
+        var area = AMap.GeometryUtil.ringArea(lnglats[0])
+
+            var polygon = new AMap.Polygon({
+              path: lnglats,
+              fillOpacity:  1 - Math.sqrt(area / 8000000000),// 面积越大透明度越高
+              strokeWeight: 1,
+              strokeColor: '#3171f6dd',
+              fillColor: 'rgba(232, 242, 245, .5)'
+            });
+            return polygon
+          }
+        });
+        geojson.setMap(this.map);
+      })
+      
+    }
+
+    creatPolyline([chanba,jrb, smb, sdb, syb, ymh, zjb]);
+</script>
+</body>
+</html>

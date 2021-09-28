@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style>
+    html,
+    body,
+    #container {
+      width: 100%;
+      height: 100%;
+    }
+    </style>
+    <title>GeoJSON</title>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=7d3505d46cfa8dcbb8f846c8ea728dc8&plugin=AMap.MarkerClusterer,AMap.ToolBar,Map3D,AMap.DistrictSearch,AMap.DistrictLayer"></script>
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+</head>
+<style>
+  .tip {
+    background: rgba(0,0,0,.5);
+    color: #fff;
+
+    position: absolute;
+    top: 0;
+    z-index: 1001;
+    font-size: 20px;
+  }
+
+  .tip span {
+    background: rgba(255,255,255,.5);
+    color: #000;
+  }
+
+  .toast {
+    background: rgba(0,0,0,.5);
+    color: #fff;
+    position: absolute;
+    z-index: 10001;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    display: none;
+  }
+</style>
+<body>
+  <div class="tip">
+    点击地图标记就可以复制到剪切板
+    <div>格式为: <span>站点名称&emsp;&emsp;站ID&emsp;&emsp;运营商ID</span></div>
+  </div>
+  <div class="toast" id="toast">test</div>
+<div id="container"></div>
+<script src="./map.js"></script>
+<script src="./point.js"></script>
+<script src="./filterPoint.js"></script>
+<script type="text/javascript">
+    var map = new AMap.Map('container', {
+        center: [109.007929,34.329759],
+        zoom: 11,
+    });
+
+
+    myPoint = filterPoint.map(item => {
+      item.lnglat = [item.station_lng, item.station_lat]
+      return item
+    })
+    point2 = point.map(item => {
+      item.lnglat = [item.station_lng, item.station_lat]
+      return item
+    })
+    var geojson = new AMap.GeoJSON({
+        geoJSON: cbJSON,
+        // 还可以自定义getMarker和getPolyline
+        getPolygon: function(geojson, lnglats) {
+            // 计算面积
+            var area = AMap.GeometryUtil.ringArea(lnglats[0])
+
+            return new AMap.Polygon({
+              path: lnglats,
+              fillOpacity: 1 - Math.sqrt(area / 8000000000),// 面积越大透明度越高
+              strokeColor: '#3171f6dd',
+              fillColor: 'rgba(232, 242, 245, .5)'
+            });
+        }
+    });
+
+    geojson.setMap(map);
+
+    var style = [{
+        url: 'https://a.amap.com/jsapi_demos/static/images/mass0.png',
+        anchor: new AMap.Pixel(0, 0),
+        size: new AMap.Size(15, 15)
+    }
+    ];
+
+    var style2 = [{
+        url: 'https://a.amap.com/jsapi_demos/static/images/mass2.png',
+        anchor: new AMap.Pixel(3, 3),
+        size: new AMap.Size(15, 15)
+    }
+    ];
+
+    
+
+    var mass = new AMap.MassMarks(myPoint, {
+        opacity: 0.8,
+        zIndex: 111,
+        cursor: 'pointer',
+        style: style
+    });
+
+    var marker = new AMap.Marker({content: ' ', map: map});
+
+    // var mass2 = new AMap.MassMarks(point2, {
+    //     opacity: 0.8,
+    //     zIndex: 111,
+    //     cursor: 'pointer',
+    //     style: style2
+    // });
+    // mass2.setMap(map);
+
+
+
+    mass.on('mouseover', function (e) {
+        marker.setPosition(e.data.lnglat);
+        let content = `<div>${e.data.station_name} - ${e.data.station_id} - ${e.data.operator_id}</div>`
+        marker.setLabel({content: content})
+    });
+
+    mass.on('click', function (e) {
+       let tempInputDOM = document.createElement('input');
+        tempInputDOM.value = `${e.data.station_name}    ${e.data.station_id}    ${e.data.operator_id}`;
+        document.body.appendChild(tempInputDOM);
+        tempInputDOM.select(); // 选中input里的内容
+        document.execCommand("Copy"); // 执行浏览器复制命令
+        document.body.removeChild(tempInputDOM);
+        toast(`${e.data.station_name}     复制成功`)
+    });
+
+    mass.setMap(map);
+
+    function toast(text) {
+      let toastDom = document.getElementById('toast')
+      toastDom.innerHTML = text
+      toastDom.style.display = 'block'
+      setTimeout(() => {
+        toastDom.style.display = 'none'
+      }, 1500);
+    }
+
+</script>
+</body>
+</html>
